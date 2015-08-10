@@ -1,0 +1,152 @@
+---
+title: "Exploratory Data Analysis of Prosper Loan Data"
+author: "Yang Yang"
+date: "August 12, 2015"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# enable caching
+knitr::opts_chunk$set(cache=TRUE, echo=FALSE)
+```
+
+Abstract
+======================================
+The data used for this analysis is from Prosper, which is America's first peer-to-peer lending marketplace, with more than 2.2 million members and over $4 billion in funded loans. It is available to the public (last updated on March 11th, 2014). The data set uses 81 variables on each loan, including loan amount, borrower rate (or interest rate), current loan status, borrower income, borrower employment status, borrower credit history, and the latest payment information. Techniques learned from the course is applied here to let the data tell some story about the borrower and the lender.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using
+# in your analysis in this code chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk.
+# This prevents the code from displaying in the knitted HTML output.
+# You should set echo=FALSE for all code chunks in your file.
+
+library(ggplot2)
+```
+
+```{r echo=FALSE, Load_the_Data}
+# Load the Data
+setwd('~/Course/Udacity_data_analysis/udacity-data-analyst-nanodegree/data_analysis_with_R_project')
+loan <- read.csv('./data/prosperLoanData.csv')
+```
+
+
+
+# Univariate Plots and Analysis
+
+### What is the structure of your dataset?
+
+```{r str}
+str(loan)
+```
+
+### Interesting Loan Features
+
+To get a feeling about the risk of being an investor, loan status is checked first. About 15% of all the loans have status of "charged off", "default", or "past due".
+```{r echo=FALSE, message=FALSE, fig.height=7, Univariate_Plots}
+table(loan$LoanStatus)
+ggplot(aes(x = LoanStatus), data = loan) +
+  geom_bar(aes(y=..count../sum(..count..) * 100), fill = I('#099DD9')) +
+  stat_bin(geom="text", binwidth = 500, size=3,
+           aes(y=..count../sum(..count..) * 100, label=format(..count../sum(..count..) * 100, digits=3),
+               vjust=-0.1, hjust=0.5)) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title="Loan Status", x="Status of Loan", y="Percentage (%)")
+```
+
+Most of the loans has a term of three years (36 months); very few loans (1.4%) has a one-year term.
+```{r}
+table(loan$Term)
+```
+
+Most of the loan amount is in the range between $1000 and $10000. For those loans with amount more than $10000, borrowers tend to just give an approximate number, as shown by the multiple peaks around numbers such as $10000, 15000, $20000, $25000, $30000 and $35000. 
+```{r}
+ggplot(aes(x=LoanOriginalAmount), data=loan) +
+  geom_histogram(binwidth=1000, color="black", fill = I('#099DD9')) +
+  scale_x_continuous(lim = c(0, 40000), breaks = seq(0, 40000, 5000)) +
+  labs(title="The Range of Loan Amount", x="Loan Amount ($)")
+```
+
+
+
+# Univariate Analysis
+
+### What is/are the main feature(s) of interest in your dataset?
+
+### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+
+### Did you create any new variables from existing variables in the dataset?
+
+### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+
+
+
+# Bivariate Plots Section
+```{r echo=FALSE, Bivariate_Plots}
+
+```
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+
+### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+### What was the strongest relationship you found?
+
+
+
+
+# Multivariate Plots Section
+
+```{r echo=FALSE, Multivariate_Plots}
+
+```
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+### Were there any interesting or surprising interactions between features?
+
+### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+
+------
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+
+```
+
+### Description Three
+
+------
+
+# Reflection
+
+Reference
+=================================
+---
+references:
+- id: prosper_wikipedia
+  URL: 'https://en.wikipedia.org/wiki/Prosper_Marketplace'
+---
