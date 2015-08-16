@@ -7144,6 +7144,20 @@ School w/o address: 1814
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p><h4>Potential Challenges:</h4></p>
+<ul>
+<li>A node may not be refered by any way document. Relying on &quot;way&quot; document to fix missing address in a node will not work for all cases.</li>
+<li>Although lattitude and longitude can be used to find nearby nodes, the nearest node may not necessarily be on the same street as the node in query; the nearest node may also be part of multiple streets as it can be a road intersection. How to identify the correct informatioon will be challenging. It may be useful to find nearby ways from information of nearby nodes and then find the nearest ways. This may give us more reliable information on the street names.</li>
+<li>Missing house numbers may not be regular; the house number may contain not only numbers but also letters. As a result, the range of house numbers can possibly be derived from interpolation; to get the exact house number will be difficult.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Improve-Data-Quality-by-Using-Other-Data-Source">Improve Data Quality by Using Other Data Source<a class="anchor-link" href="#Improve-Data-Quality-by-Using-Other-Data-Source">&#182;</a></h3>
 </div>
 </div>
@@ -7156,6 +7170,25 @@ School w/o address: 1814
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Based on the results from previous seciton, about 50% of the data was edited more than 5 years ago, which might be outdated.
 It will be useful to check if those old data are still valid. Checking the existing data against data from another database will be valuable. Every node in the dataset has position [lattitude, longtitude]. Google Map API provides &quot;Reverse Geocoding&quot;, which translates a location on the map into a human-readable address. This may provide an effective way to check the exisiting node data and make the existing node data more complete.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="Potential-Challenges:">Potential Challenges:<a class="anchor-link" href="#Potential-Challenges:">&#182;</a></h4>
+</div>
+</div>
+</div>
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Checking data consistency for tens of thousands of node documents by submitting query through web api may not be practical due to the slow speed of web inquiries.</p>
 </div>
 </div>
 </div>
