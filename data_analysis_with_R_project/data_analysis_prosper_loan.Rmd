@@ -1,18 +1,20 @@
 ---
 title: "Exploratory Data Analysis of Prosper Loan Data"
 author: "Yang Yang"
-date: "August 12, 2015"
-output: html_document
+date: "Oct 24, 2015"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    theme: cerulean
+    highlight: tango
 ---
 
 ```{r setup, include=FALSE}
 # enable caching
 knitr::opts_chunk$set(cache=TRUE, echo=FALSE)
 ```
-
-Abstract
-======================================
-The data used for this analysis is from Prosper, which is America's first peer-to-peer lending marketplace, with more than 2.2 million members and over $4 billion in funded loans. It is available to the public (last updated on March 11th, 2014). The data set uses 81 variables on each loan, including loan amount, borrower rate (or interest rate), current loan status, borrower income, borrower employment status, borrower credit history, and the latest payment information. Techniques learned from the course is applied here to let the data tell some story about the borrower and the lender.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all of the packages that you end up using
@@ -21,132 +23,678 @@ The data used for this analysis is from Prosper, which is America's first peer-t
 # Notice that the parameter "echo" was set to FALSE for this code chunk.
 # This prevents the code from displaying in the knitted HTML output.
 # You should set echo=FALSE for all code chunks in your file.
-
+library(knitr)
 library(ggplot2)
-```
+library(dplyr)
+library(tidyr)
+library(gridExtra)
+library(corrplot)
+library(car)
+#library(plyr)
+library(ggthemes)
+library(reshape2)
+#library(GGally)
 
-```{r echo=FALSE, Load_the_Data}
 # Load the Data
-setwd('~/Course/Udacity_data_analysis/udacity-data-analyst-nanodegree/data_analysis_with_R_project')
-loan <- read.csv('./data/prosperLoanData.csv')
+#setwd('~/Course/Udacity_data_analysis/udacity-data-analyst-nanodegree/data_analysis_with_R_project')
+setwd("~/Documents/courses/udacity_data_analysis/udacity-data-analyst-nanodegree/data_analysis_with_R_project")
+loan.original <- read.csv('./data/prosperLoanData.csv', na.strings = c("", "NA"))
+dataDate <- as.Date("2014-03-11")
+
+
+rotate_x_txt <- theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
+# Introduction
 
+The data used for this analysis is from [Prosper](https://www.prosper.com/about),
+which is America's first peer-to-peer lending marketplace. It is available to
+the public (last updated on March 11th, 2014). The data set has 113,937 rows and 81 variables
+for each loan, including loan amount, borrower rate (or interest rate),
+current loan status, borrower income, borrower employment status, borrower
+credit history, and the latest payment information. Techniques learned from
+the course are applied here to let the data tell some stories about the risk of investment. 
+The goal is to understand how
+p2p loan works and the performance of a loan, like paid off, or default.
+
+The following features are related to the risk of the loan and I will analyze them in this report:
+
+Variable                 | Description
+-------------------------|-----------------------
+LoanStatus               | The current status of the loan: Cancelled, Chargedoff, Completed, Current, Defaulted, FinalPaymentInProgress, PastDue. The PastDue status will be accompanied by a delinquency bucket.
+BorrowerRate             | The Borrower's interest rate for the loan
+DebtToIncomeRatio        | The debt to income ratio of the borrower at the time the credit profile was pulled. This value is Null if the debt to income ratio is not available. This value is capped at 10.01 (any debt to income ratio larger than 1000% will be returned as 1001%).
+StatedMonthlyIncome      | The monthly income the borrower stated at the time the listing was created.
+MonthlyLoanPayment       | The scheduled monthly loan payment.
+EmploymentStatus         | The employment status of the borrower at the time they posted the listing.
+EmploymentStatusDuration | The length in months of the employment status at the time the listing was created.
+ProsperRating (Alpha)    | The Prosper Rating assigned at the time the listing was created between AA - HR.  Applicable for loans originated after July 2009.
+CreditGrade              | The Credit rating that was assigned at the time the listing went live. Applicable for listings pre-2009 period and will only be populated for those listings.
+OpenCreditLines          | Number of open credit lines at the time the credit profile was pulled.
+CurrentDelinquencies     | Number of accounts delinquent at the time the credit profile was pulled.
+DelinquenciesLast7Years  | Number of delinquencies in the past 7 years at the time the credit profile was pulled.
+LoanOriginationDate      | The date the loan was originated.
+LoanOriginalAmount       | The origination amount of the loan.
 
 # Univariate Plots and Analysis
 
-### What is the structure of your dataset?
+## Univariate Plots
+
+### Data Set Structure Overview
+
+Structure of the data and a quick summary is shown below.
 
 ```{r str}
+features  <- c('LoanStatus'               , 'BorrowerRate'            ,
+               'DebtToIncomeRatio'        , 'StatedMonthlyIncome'     ,
+               'MonthlyLoanPayment'       , 'EmploymentStatus'        ,
+               'EmploymentStatusDuration' , 'ProsperRating..Alpha.'   ,
+               'CreditGrade'              , 'OpenCreditLines'         ,
+               'CurrentDelinquencies'     , 'DelinquenciesLast7Years' ,
+               'LoanOriginationDate', 'LoanOriginalAmount')
+
+loan  <- loan.original[features]
+
+rating_levels <- levels(loan$ProsperRating..Alpha.)
+loan$ProsperRating..Alpha. <- factor(loan$ProsperRating..Alpha., c('AA', 'A', 'B', 'C', 'D', 'E', 'HR'))
+
+loan$LoanOriginationDate <- as.Date(loan$LoanOriginationDate)
+
 str(loan)
+summary(loan)
+
+loan$PreJuly2009 <- loan$LoanOriginationDate < as.Date('2009-07-13')
 ```
 
-### Interesting Loan Features
+### Loan Status
+To get a feeling about the risk of being an investor, loan status is checked first. About 15% of all the loans have status of "charged off", "default", or "past due". And 33% are completed, and 50% is still in the process. The "Past due" is less than 2% which is very impressed. In traditional lending industry, it will be more than 10%. People who applied loans online are totally different from the traditional world.
 
-To get a feeling about the risk of being an investor, loan status is checked first. About 15% of all the loans have status of "charged off", "default", or "past due".
-```{r echo=FALSE, message=FALSE, fig.height=7, Univariate_Plots}
-table(loan$LoanStatus)
-ggplot(aes(x = LoanStatus), data = loan) +
-  geom_bar(aes(y=..count../sum(..count..) * 100), fill = I('#099DD9')) +
-  stat_bin(geom="text", binwidth = 500, size=3,
-           aes(y=..count../sum(..count..) * 100, label=format(..count../sum(..count..) * 100, digits=3),
-               vjust=-0.1, hjust=0.5)) + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  labs(title="Loan Status", x="Status of Loan", y="Percentage (%)")
-```
-
-Most of the loans has a term of three years (36 months); very few loans (1.4%) has a one-year term.
 ```{r}
-table(loan$Term)
+status_table <- table(loan$LoanStatus)
+status_table <- as.data.frame(status_table * 100 / sum(status_table))
+kable(status_table, col.names = c("Loan Status", "Percentage (%)"), align = 'c')
 ```
 
-Most of the loan amount is in the range between $1000 and $10000. For those loans with amount more than $10000, borrowers tend to just give an approximate number, as shown by the multiple peaks around numbers such as $10000, 15000, $20000, $25000, $30000 and $35000. 
 ```{r}
-ggplot(aes(x=LoanOriginalAmount), data=loan) +
-  geom_histogram(binwidth=1000, color="black", fill = I('#099DD9')) +
-  scale_x_continuous(lim = c(0, 40000), breaks = seq(0, 40000, 5000)) +
-  labs(title="The Range of Loan Amount", x="Loan Amount ($)")
+ggplot(data = loan, aes(LoanStatus)) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+                binwidth = 0.005, color = 'black', fill = 'lightblue') +
+  labs(title = 'Loan Status in Percentage', y = 'Percentage (%)', x = 'Loan Status') +
+  rotate_x_txt
+```
+
+### Borrower Rate
+Borrower rate is slightly skewed to the right. The mean of the borrower rate is 19% which is a slighter higher than the median 18%. The main cause for the right skew is the high percentage of the borrower rate at 32% and 35% which I believe is high risk customer. 
+
+```{r}
+ggplot(data = loan, aes(BorrowerRate)) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth = 0.005, color = 'black', fill = 'lightblue') +
+  scale_x_continuous(breaks = seq(0, 0.5, 0.05)) +
+  labs(title = 'Borrower Rate in Percentage', y = 'Percentage (%)', x = 'Borrower Rate')
+```
+
+### Debt to Income Ratio
+It's obvious that most of the borrowers has debt-to-income-ratio less than 1, otherwise they could not afford their loans. Weird cases happend probably they have co-applicant. The avg debt-to-income-ratio is around 30% which is aligned with the other finacial companies. It's a rule of thumb that home mortgage will be 4 times of one's income. You can see from the summary table that 75% of the borrowers has the ratio less than 32%. 
+Note: In the plot, data with debt-to-income-ratio larger than 1 is ignored.
+
+```{r}
+count_table  <- table(loan$DebtToIncomeRatio > 1)
+count <- as.data.frame(count_table * 100 / sum(count_table))
+kable(count, col.names = c("Debt to income ratio > 1?", "Percentage (%)"), align = 'c')
+ggplot(aes(x=DebtToIncomeRatio), data=subset(loan,DebtToIncomeRatio<=1)) + 
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth=0.01, fill='lightblue', color='black') +
+  scale_x_continuous(breaks = seq(0, 1, 0.1)) +
+  labs(title=expression(paste("Debt to Income Ratio (for ", DTI <= 1,")")),
+       x = 'Debt / Income', y = 'Percentage (%)')
+```
+
+### Stated Monthly Income
+Median of the stated monthly is only $4467; however, the max value is $1,750,000 which surprises me, maybe it's a wrong point. The US household median monthly income is around $4K which is similar to the P2P case. And We also can tell that the majority of the borrower is from the middle-class family from the 22th quantile and 75th quantile.
+
+```{r}
+summary(loan$StatedMonthlyIncome)
+```
+99th quantile of the stated monthly income is about $20526.7 which is still high.
+```{r}
+quantile(loan$StatedMonthlyIncome, c(0.25, 0.5, 0.75, 0.9, 0.99, 0.995))
+```
+
+I plotted the stated monthly income in both log and linear scale below. As we know if we take log of income it would be more normally distributed which will help us in the regression analysis. It is surprising that about 1.5% of the borrowers stated their monthly income is 0 which may due to duplicate applicant or just test on the P2P online lending. To plot it correctly in the log scale, stated monthly income plus 1 is plotted. The spike at 1 indicates the percentage of borrowers with stated monthly income equal to 0. There is also `r sum(loan$StatedMonthlyIncome > 10e5)` borrower claimed his/her monthly income is greater than $100,000, which is only less 0.5%. For the linear scale, we only include the stated monthly income <= $25,000.
+
+```{r}
+x_log10 <- ggplot(aes(x = StatedMonthlyIncome + 1), data = loan) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth = 0.05, fill = 'lightblue', color = 'black') +
+  scale_x_log10(breaks = c(1, 10, 100, 1000, 10000, 10 ^ 5, 10 ^ 6)) +
+  scale_y_continuous(breaks=seq(0, 10, 1)) +
+  labs(title = "Stated Monthly Income in Log Scale",
+       x = "Stated Monthly Income + 1", y = 'Percentage (%)')
+linear <- ggplot(aes(x = StatedMonthlyIncome), data = subset(loan, StatedMonthlyIncome <= 25000)) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth = 200, fill = 'lightblue', color = 'black') +
+  scale_x_continuous(breaks = seq(0, 25000, 2000)) +
+  labs(title = "Stated Monthly Income in Linear Scale (<= 25000)",
+       x = "Stated Monthly Income", y = 'Percentage (%)')
+grid.arrange(x_log10, linear, ncol = 1)
+```
+
+### Monthly Loan Payment
+Median of the monthly loan payment is `r median(loan$MonthlyLoanPayment)`; 90th quantile of monthly loan payment is `r quantile(loan$MonthlyLoanPayment, 0.9)`. The regular loan payment is lower than any regular auto loan/credit card payment. Probably that's why people go to P2P online lending. Otherwise it will be very costive and time consuming to do it offline in office or in person.
+
+```{r}
+ggplot(aes(x = MonthlyLoanPayment), data = loan) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth = 20, fill = 'lightblue', color = 'black') +
+  scale_x_continuous(breaks = seq(0, 2400, 200)) +
+  labs(title = "Monthly Loan Payment",
+       x = "Monthly Loan Payment", y = 'Percentage (%)')
+```
+
+It is also interesting to see how much of the income is used to pay for the loan each month.So a new variable called "MonthlyLoanPaymentToIncomeRatio" was created: $MonthlyLoanPaymentToIncomeRatio = MonthlyLoanPayment / StatedMonthly Income$.
+
+For about 1.5% of the borrowers as shown in the plot below, this ratio is greater than 1, possibly due to incorrect monthly income. This ratio is capped at 1.01; any value greated than 1 is replaced by 1.01. We can see the ratio is right skewed. And it's not as normalized as the debt to income ratio. Actually if we add the new monthly loan payment to the original debt, it will be similar to the debt to income ratio.
+
+```{r}
+loan$MonthlyLoanPaymentToIncomeRatio <- ifelse(loan$StatedMonthlyIncome == 0, 1.01, loan$MonthlyLoanPayment / loan$StatedMonthlyIncome)
+loan$MonthlyLoanPaymentToIncomeRatio <- ifelse(loan$MonthlyLoanPaymentToIncomeRatio > 1, 1.01, loan$MonthlyLoanPaymentToIncomeRatio)
+quantile(loan$MonthlyLoanPaymentToIncomeRatio, c(0.5, 0.9, 0.95, 0.97))
+ggplot(aes(x = MonthlyLoanPaymentToIncomeRatio), data = loan) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth = 0.01, fill = 'lightblue', color = 'black') +
+  scale_y_sqrt(breaks = seq(0, 14, 1)) +
+  labs(title = "Monthly Loan Payment to Income Ratio (capped at 1.01)",
+    x = "Monthly Loan Payment / Stated Monthly Income",
+    y = 'Percentage (%)')
+```
+
+### Employment Status and Duration
+The majority of the borrowers are employed. But it is not clear what the status "Other" means. Besides, it is not clear how much from the category "Employed" is full-time.
+
+```{r}
+count_table <- table(loan$EmploymentStatus)
+count <- as.data.frame(count_table * 100 / sum(count_table))
+kable(count, col.names = c("Employment Status", "Percentage (%)"), align = 'c')
+```
+
+```{r}
+ggplot(data = loan, aes(EmploymentStatus)) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+                binwidth = 0.005, color = 'black', fill = 'lightblue') +
+  labs(title = 'Employment Status in Percentage',
+    y = 'Percentage (%)', x = 'Employment Status') +
+  rotate_x_txt
+```
+
+And for the employment status duration, it's right skewed. It seems like the young workers would like to apply for the P2P online lending.
+
+```{r}
+ggplot(aes(x=EmploymentStatusDuration / 12), data=loan) +
+    geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+      binwidth=1, fill='lightblue', color='black') +
+    labs(title="Employment Status Duration",
+         x = "Employment Status Duration (Year)", y = "Percentage (%)")
+```
+
+### Prosper Rating
+Prosper was required to suspend its business pending SEC approval from Oct 15, 2008 to July 13, 2009, known as [Prosper's Quiet Period](http://www.lendacademy.com/a-look-back-at-the-lending-club-and-prosper-quiet-periods/).
+After this period, Prosper introduced "[Prosper Rating](https://www.prosper.com/invest/how-to-invest/prosper-ratings/)" to allow potential investors to easily consider a loan application's level of risk because the rating represents an estimated average annualized loss rate range to the investor. we can see from the following two graphs, that the risk is normal distributed in their loans. You can get some very good borrower, you also get some pretty bad borrower. But you can earn much more from the bad borrower.
+
+```{r}
+ggplot(aes(x=ProsperRating..Alpha.), data=subset(loan, !PreJuly2009)) +
+    geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+      binwidth=1, fill='lightblue', color='black') +
+    scale_x_discrete() +
+    labs(x = "Proster Rating", y = 'Percentage (%)')
+```
+
+Before July 13, 2009, the so-called "CreditGrade" was assigned when the loan listing went live.
+
+```{r}
+ggplot(aes(x=CreditGrade), data=subset(loan, PreJuly2009)) +
+    geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+      binwidth=1, fill='lightblue', color='black') +
+    scale_x_discrete() +
+    labs(x = "Credit Grade", y = 'Percentage (%)')
+```
+
+### Open Credit Lines
+It's also interesting to see how many open credit lines do the borrower have. The avg and median of the open credit lines are both 9 which is reasonable. Though we see some have 40 or 50, probably they abuse the credit lines.
+
+```{r}
+ggplot(aes(x=OpenCreditLines), data=loan) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth=1, fill='lightblue', color='black') +
+  scale_x_discrete(breaks=seq(0, 60, 2)) +
+  scale_y_continuous(breaks=seq(0, 10, 0.5)) +
+  labs(x = "Number of Open Credit Lines", y = 'Percentage (%)')
+```
+
+### Current Delinquencies
+As shown below, about 80% of the borrowers don't have delinquencies; the number of current delinquencies is less than or equal to 10 for 99% of the borrowers. It will be high risky if the borrower already delinquent. And the borrower probably just open a new credit line to cover the other delinquency.
+
+```{r}
+quantile(loan$CurrentDelinquencies, c(0.5, 0.9, 0.99), na.rm = T)
+```
+
+```{r}
+ggplot(aes(x=CurrentDelinquencies), data=loan) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth=1, fill='lightblue', color='black') +
+  scale_x_continuous(breaks=seq(0, 20, 1), limits=c(0,20)) +
+  scale_y_sqrt(breaks=seq(0, 80, 10)) +
+  labs(x = "Current Delinquencies", y = "Percentage (%)",
+       title = "Current Delinquencies (ignore borrowers with more than 20 current delinquencies)")
+```
+
+### Delinquencies in Last 7 Years
+Previous borrower behavior would give us an insight if the borrower is good or not. About 70% of them don't have any delinquency, and 95% of the borrowers have less than `r quantile(loan$DelinquenciesLast7Years, 0.95, na.rm=T)` delinquencies in the past 7 years.
+It is unclear there is a spike at 99 in the plot below; but the percentage is pretty low, which is about `r sum(loan$DelinquenciesLast7Years == 99, na.rm=T) / nrow(loan) * 100`%.
+
+```{r}
+ggplot(aes(x=DelinquenciesLast7Years), data=loan) +
+  geom_histogram(aes(y = ..count.. / sum(..count..) * 100),
+    binwidth=1, fill='lightblue', color='black') +
+  scale_x_continuous() +
+  scale_y_sqrt(breaks=seq(0, 80, 10)) +
+  labs(x = "Delinquencies in Last 7 Years", y = "Percentage (%)")
 ```
 
 
-
-# Univariate Analysis
+## Univariate Analysis
 
 ### What is/are the main feature(s) of interest in your dataset?
+As we all know, the P2P online lending is to help people to payoff their debts more convient and give both the borrower and the lender the opportunity to choose the best for them which is totally different from the traditional lending industry. For the investors, they will use the Prosper Rating to determine if they fund the loan or not, and if the loan will be default or not. For the borrowers, the Prosper Rating is critial to their application, whether they will get the loan or not. So the main features will be their Prosper Rating and loan status.
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+The Prosper Rating is the key in the prosper lending business. I would like to explore all the other credit related variables to see how they related to the prosper rating and the loan status. I picked employment status, employment status duration, stated monthly income, current delinquencies, debt to income ratio etc.
+Other information such as "EmploymentStatusVerifiable", "AmountDelinquent" may also be useful.
 
 ### Did you create any new variables from existing variables in the dataset?
+I created three variables for the analysis.
+
+The current loan status has too many levels, then it is simiplified into 3 factor levels:
+1. Good Loan: Completed or Final Payment in Progress;
+2. Bad Loan: Charged-off, Default, Cancelled or Past Due;
+3. Current: Current,Since loan with status "Cancelled" or "Past Due" are only a small portion of the dataset. Including them in the "Bad Loan" category should not change the analysis results.
+
+Besides, I also converted LoanOriginationDate as Date object, which will facilitate analysis in the following sections.
+
+I also created a variable of the ratio of MonthlyLoanPayment to Stated Monthly Income. The ratio will tell us the borrower's ability to pay off the debt.
 
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
+The disbribution of StatedMonthlyIncome is unusaual. The tail is very long. These numbers are probably entered by the borrowers and probably contains incorrect information. In the following analysis, StatedMonthlyIncome larger than 99th quantile are ignored.
 
+Debt to Income ratio has the same issue. For people who is already utilized their income for the debt, it's impossible to pay back the new debt. I will be some capping and flooring for the other data as well.
 
+# Bivariate Plots and Analysis
+## Bivariate Plot
 
-# Bivariate Plots Section
-```{r echo=FALSE, Bivariate_Plots}
+### Prosper Rating and Loan Status
+As mentioned above, loan status is simplified as "Good Loan", "Bad Loan" and "Current".
+Prosper rating clearly shows a strong relationship with the loan status. Lower rating
+indicates a higher percentage of bad loans.
+
+```{r}
+loan.st_grouped <- loan
+loan.st_grouped$LoanStatusGrouped <- loan.st_grouped$LoanStatus
+levels(loan.st_grouped$LoanStatusGrouped) <- sub("^(Past|Default|Chargedoff|Cancelled).*$",
+  "Bad Loan", levels(loan.st_grouped$LoanStatusGrouped))
+levels(loan.st_grouped$LoanStatusGrouped) <- sub("^(Completed|FinalPaymentInProgress)$",
+  "Good Loan", levels(loan.st_grouped$LoanStatusGrouped))
+loan.status_group <- subset(loan.st_grouped, !is.na(ProsperRating..Alpha.)
+    & LoanStatusGrouped != 'Current') %>% 
+  group_by(ProsperRating..Alpha.) %>% 
+  summarise(n = n(), bad = sum(LoanStatusGrouped == "Bad Loan"))
+loan.status_group <- mutate(loan.status_group,
+                            BadLoan= bad / n * 100,
+                            GoodLoan= 100 * (1 - bad / n))
+loan.status_group <- gather(loan.status_group[, c(1, 4, 5)], variable, percent, -ProsperRating..Alpha.)
+ggplot(data = loan.status_group, aes(x = ProsperRating..Alpha., y = percent, fill = variable)) +
+  geom_bar(stat = 'identity') +
+  xlab('Prosper Rating') +
+  scale_y_continuous(breaks = seq(0, 100, 10)) +
+  ylab('Percentage (%)')
+```
+
+### Relationship between Loan Status and Debt-to-Income-Ratio, Monthly Income, Open Credit Lines and Current Delinquencies
+"Good Loan" shows a lower median debt to income ratio; interestingly, the "Current" loan
+shows a higher median of debt to income ration than both bad and good loans. I guess that the "Good Loan" and "Bad Loan" are several years older, and the loan size is smaller than the current ones. And more people are moving to get loans from the online lender, the borrowers will definitely be different from the old population, probably shift to more wealthy people.
+
+As expected, "Good Loan" shows a higher median income. "Current" loan shows a higher median income
+than both good and bad loans. The trend is similar for open credit lines.
+
+The portion of borrowers within the "Bad Loan" group that have current delinquencies
+is higher than the other two groups.
+
+As for the duration of employment status, there is no significant difference between bad and good loan.
+```{r}
+ggplot(aes(x = LoanStatusGrouped, y = DebtToIncomeRatio),
+       data = subset(loan.st_grouped, !is.na(DebtToIncomeRatio) & LoanStatusGrouped != 'current'
+                     & DebtToIncomeRatio <= quantile(loan.st_grouped$DebtToIncomeRatio, 0.95, na.rm = T))) +
+  geom_boxplot() +
+  labs(title = 'DebtToIncomeRatio vs Loan Status', x = 'Loan Status', y = 'Debt To Income Ratio')
+
+ggplot(aes(x = LoanStatusGrouped, y = StatedMonthlyIncome),
+       data = subset(loan.st_grouped, !is.na(StatedMonthlyIncome) & LoanStatusGrouped != 'current'
+                     & StatedMonthlyIncome <= quantile(loan.st_grouped$StatedMonthlyIncome, 0.99, na.rm = T))) +
+  geom_boxplot() +
+  labs(title = 'Stated Monthly Income vs Loan Status', x = 'Loan Status', y = 'Stated Monthly Income')
+
+ggplot(aes(x = LoanStatusGrouped, y = OpenCreditLines),
+       data = subset(loan.st_grouped, LoanStatusGrouped != 'current' & !is.na(OpenCreditLines))) +
+  geom_boxplot() +
+  labs(title = 'Open Credit Lines vs Loan Status', x = 'Loan Status', y = 'Number of Open Credit Lines')
+
+ggplot(aes(x = LoanStatusGrouped, y = CurrentDelinquencies),
+       data = subset(loan.st_grouped, !is.na(CurrentDelinquencies) & LoanStatusGrouped != 'current')) +
+#                     & CurrentDelinquencies <= quantile(loan.st_grouped$CurrentDelinquencies, 0.95, na.rm = T))) +
+  geom_boxplot() +
+  scale_y_sqrt() +
+  labs(title = 'Current Delinquencies vs Loan Status', x = 'Loan Status', y = 'Current Delinquencies')
+
+ggplot(aes(x = LoanStatusGrouped, y = EmploymentStatusDuration),
+       data = subset(loan.st_grouped, LoanStatusGrouped != 'current' & !is.na(EmploymentStatusDuration))) +
+  geom_boxplot() +
+  scale_y_sqrt() +
+  labs(title = 'Employment Status Duration vs Loan Status', x = 'Loan Status', y = 'Duration of Employment (Month)')
+```
+
+### Prosper Rating and DebtToIncomeRatio
+Smaller debt to income ratio tends to have better Prosper Rating. But the debt to income ratio seems to be stable in the other credit groups: C, D, E and HR. It's probably because the ratio will be capped in the Prosper Rating decision. And we can see that more bad Prosper Rating borrowers in the loan portofilo. I think online lending is more attractive to the bad rating borrower since they are hard to get the loan and good borrow rate from the traditional finance industry. 
+
+```{r warning=FALSE, message=FALSE}
+tmp <- subset(loan, !is.na(ProsperRating..Alpha.) & !is.na(DebtToIncomeRatio))
+p1 <- ggplot(aes(x = ProsperRating..Alpha., y = DebtToIncomeRatio), data = tmp) +
+  geom_boxplot() +
+  ylim(0, 0.5)
+p2 <- ggplot(aes(x = DebtToIncomeRatio, color = ProsperRating..Alpha.),
+       data = tmp) +
+  geom_freqpoly(aes(group = ProsperRating..Alpha.)) +
+  xlim(0.5, 5) +
+  ylim(0, 250)
+
+grid.arrange(p1, p2, ncol = 1)
+```
+
+### Expected Return Increases with Risk Level
+It's aligned with what we have talked above. High risk level means more revenue. For the same amount of the loan, the good Prosper Rating borrower will get 4.99% borrow rate, while the bad Prosper Rating borrower will get 14.99%. As long at the loan is in good status, the return will increase with the risk level.
+
+```{r}
+ggplot(aes(x = ProsperRating..Alpha., y = BorrowerRate),
+       data = subset(loan, !is.na(ProsperRating..Alpha.))) +
+  geom_boxplot() +
+  labs(x = "Prosper Rating", y = "Borrower Rate")
 
 ```
 
-# Bivariate Analysis
+### Loan Data Variation through Time
+Debt-to-income-ratio, stated monthly income and loan original amount all increase over the time. There is a drop from Oct, 2008 to Jun, 2009 as the result of the economic crisis. But it went up right after that. Probably it's because that the traditional finance company couldn't offer more and people are switching to the online lending.
+
+```{r}
+loan.month_group <- loan
+loan.month_group$LoanOriginationDateByMonth <- as.Date(format(loan.month_group$LoanOriginationDate, "%Y-%m-15"))
+
+loan.dti_by_month <- subset(loan.month_group, !is.na(DebtToIncomeRatio)) %>%
+  group_by(LoanOriginationDateByMonth) %>%
+  summarise(mean_dti = mean(DebtToIncomeRatio),
+    median_dti = median(DebtToIncomeRatio),
+    n = n())
+ggplot(aes(x = LoanOriginationDateByMonth, y = median_dti),
+       data = loan.dti_by_month) +
+  geom_point() +
+  geom_line() +
+  scale_x_date(breaks="4 month", minor_breaks = '1 month') +
+  rotate_x_txt +
+  labs(x = "Time", y = "Median of Debt To Income Ratio")
+```
+
+```{r}
+loan.income_by_month <- subset(loan.month_group, !is.na(StatedMonthlyIncome)) %>%
+  filter(StatedMonthlyIncome <= quantile(loan.month_group$StatedMonthlyIncome, 0.99, na.rm=T)) %>% 
+  group_by(LoanOriginationDateByMonth) %>%
+  summarise(mean_income = mean(StatedMonthlyIncome),
+    median_income = median(StatedMonthlyIncome),
+    n = n())
+ggplot(aes(x = LoanOriginationDateByMonth, y = median_income),
+       data = loan.income_by_month) +
+  geom_point() +
+  geom_line() +
+  scale_x_date(breaks="4 month", minor_breaks = '1 month') +
+  rotate_x_txt +
+  labs(x = "Time", y = "Median of Stated Monthly Income")
+```
+
+```{r}
+loan.amount_by_month <- subset(loan.month_group, !is.na(LoanOriginalAmount)) %>%
+  group_by(LoanOriginationDateByMonth) %>%
+  summarise(mean_amount = mean(LoanOriginalAmount),
+    median_amount = median(LoanOriginalAmount),
+    n = n())
+ggplot(aes(x = LoanOriginationDateByMonth, y = median_amount),
+       data = loan.amount_by_month) +
+  geom_point() +
+  geom_line() +
+  scale_x_date(breaks="4 month", minor_breaks = '1 month') +
+  rotate_x_txt +
+  labs(x = "Time", y = "Median of Stated Monthly Income")
+```
+```{r}
+# ggplot(aes(x = StatedMonthlyIncome, y = DebtToIncomeRatio),
+#        data = subset(loan.st_grouped, !is.na(StatedMonthlyIncome) & !is.na(DebtToIncomeRatio) &
+#                      StatedMonthlyIncome < quantile(loan.st_grouped$StatedMonthlyIncome, 0.99, na.rm = T))) +
+#   geom_point(alpha = 1/20) +
+#   scale_y_continuous()
+# theme_set(theme_minimal(20))
+# set.seed(1542)
+# loan_subset <- loan[c(1:12, 15)]
+# names(loan_subset)
+# 
+# ggpairs(loan_subset[sample.int(nrow(loan_subset), 1000), ])
+```
+
+### The relationship between the numeric variables
+We will use a correlation plot to demonstate their relationship. The stated monthly income is highly correlated with the monthly debt to income ratio which implies that people who earn more like to spend more. The other interesting part is that the Borrower rate has a negative correlation with the stated monthly income. I thought people who are more weathy is more likely to get a lower borrower rate. 
+
+```{r fig.width=7, fig.height=7}
+ loan_num <- loan[, -c(1, 6, 8, 9, 13, 14, 16)]
+ names(loan_num)
+ loan_num <- subset(loan_num, StatedMonthlyIncome <= quantile(loan$StatedMonthlyIncome, 0.99))
+ m <- cor(loan_num, use = 'complete')
+ corrplot(m, method="number")
+```
+
+## Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
+In this section, I checked a lot of the feautures that related to the loan status and Prosper Rating. You will see that loan status has a strong relationship with the Prosper Rating, Debt-to-Income-Ratio, Monthly Income, Open Credit Lines and Current Delinquencies etc. A good loan tends to have smaller debt to income ratio, more monthly income, less open credit lines and less current delinquecies. 
 
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+1. The employee status duration didn't has a strong relationship with the loan status. It's common that more time in the employment tends to be less risky. 
+
+2. The Prosper Rating seems to have strong relationship with the other features, like Debt-to-Income-Ratio, Monthly Income, Open Credit Lines and Current Delinquencies etc. The Prosper Rating seems to be a good decision variable built by Prosper. 
+
+3. Borrower rate has negative relationship with the stated monthly income.
+
+4. All the features are quite different in "current" group from "Paidoff", "Chargedoff" and "Defaulted" group. It's probably because of the new loans are quite different from the old loans. 
 
 ### What was the strongest relationship you found?
+For the numeric variables, the correlation coefficient for stated monthly income and monthly debt to income ratio is the highest, which is 0.4. But if we consider the character variables, loan status and Prosper Rating should be the strongest relationship.
 
 
 
+# Multivariate Plots And Analysis
 
-# Multivariate Plots Section
+## Multivariate Plots
 
-```{r echo=FALSE, Multivariate_Plots}
+### Borrower Rate, Loan Status and Debt to Income Ratio
 
+We can see that the worse borrower rate intends to more bad loan, and worse debt leads to more bad loan. We can see more bad loan in the upper right side of the graph.
+
+```{r}
+ggplot(aes(x = BorrowerRate, y =DebtToIncomeRatio, color = LoanStatusGrouped ),
+       data =  subset(loan.st_grouped, !is.na(DebtToIncomeRatio))) +
+  theme(legend.position = "bottom") +
+  geom_point( position = position_jitter( h = 0))  +  
+  scale_y_continuous(limits=c(0,1) )+
+  ggtitle('BorrowerRate by Loan Status and Debt to Income Ratio') 
 ```
 
-# Multivariate Analysis
+### BorrowerRate, Delinquencies in Last 7 years and Loan Status
+It seems like the delinquencies in last 7 years don't have a clearly pattern with the current loan status. We can see the number of Delinquecies is well distributed in the whole population, but the extreme high delinquencies will have more bad loans. The borrower Rate seems not correlated with the delinques.
+```{r}
+ggplot(aes(x = BorrowerRate, y = DelinquenciesLast7Years, color = LoanStatusGrouped ),
+       data =  subset(loan.st_grouped, !is.na(BorrowerRate))) +
+  theme(legend.position = "bottom") +
+  geom_point( position = position_jitter( h = 0))  + 
+  ggtitle('Delinquencies in Last7 years by BorrowerRate and Loan Status') 
+```
+
+### Borrower Rate, Loan Status and Prosper Rating
+Bad Loans are more likely follow into the bad Prosper Rating, especially those don't have any credit rating. And we can also see that Borrower Rate is higher in the right hand group.
+```{r}
+ggplot(aes(x = ProsperRating..Alpha., y =BorrowerRate, color = LoanStatusGrouped ),
+       data = loan.st_grouped) +
+  theme(legend.position = "bottom") +
+  geom_point( position = position_jitter( h = 0))  + 
+  ggtitle('BorrowerRate by Loan Status and Prosper Rating') 
+```
+
+### Debt to Income Ratio, Loan Status and Prosper Rating
+Worse Prosper Rating tends to have more bad loans, and have a much wider debt to income ratio. 
+
+```{r}
+ggplot(aes(x = ProsperRating..Alpha., y =DebtToIncomeRatio, color = LoanStatusGrouped ),
+       data =  subset(loan.st_grouped, !is.na(DebtToIncomeRatio))) +
+  theme(legend.position = "bottom") +
+  geom_point( position = position_jitter( h = 0))  + 
+   scale_y_continuous(limits=c(0,1) )+
+  ggtitle('Debt to Income Ratio by Loan Status and Prosper Rating') 
+```
+
+### Open Credit Line, Loan Status and Prosper Rating
+The Open credit line seems not have a strong relationship with the Prosper Rating and the Loan Status. We can not determine borrowers behavior without looking at the "Good" Credit lines. Probably, they have more open credit lines just because of the credit card debt utilization. Or some really good customers may utilized their credit card rewards systerm.
+
+```{r}
+ggplot(aes(y = ProsperRating..Alpha., x =OpenCreditLines, color = LoanStatusGrouped ),
+       data =  subset(loan.st_grouped, !is.na(OpenCreditLines))) +
+  theme(legend.position = "bottom") +
+  geom_point( position = position_jitter( h = 0))  + 
+  ggtitle('Open Credit Lines by Loan Status and Prosper Rating') 
+```
+
+### Stated Monthly Income, Loan Status and Prosper Rating
+We could not tell the stated monthly Income has a relationship with the loan status or not.
+```{r}
+ggplot(aes(y = ProsperRating..Alpha., x =StatedMonthlyIncome, color = LoanStatusGrouped ),
+       data =  subset(loan.st_grouped, !is.na(StatedMonthlyIncome))) +
+  theme(legend.position = "bottom") +
+  geom_point( position = position_jitter( h = 0))  + 
+    scale_x_continuous(limits=c(0,1e+5) )+
+  ggtitle('Stated Monthly Income by Loan Status and Prosper Rating') 
+```
+
+### Linear Regression Models for the BorrowerRate
+
+The BorrowrRate would be the the model result from Prosper Rating. I then include one more variable: DebtToIncomeRatio. The model seems to be a good fit, the Adjusted R^2 is 0.9. The P value for the DebtToIncomeRatio is 0.45 which indicates the DebtToIncome didn't play any role in the model. I also put the stated monthly income, it has the same issue.
+
+```{r}
+lmfit<-lm(formula =BorrowerRate ~ProsperRating..Alpha.+ DebtToIncomeRatio, data = loan.st_grouped)
+summary(lmfit)
+plot(lmfit)
+```
+
+### Logistic Regression Models for the Loan Status
+
+I create a new dummy variable, loanstatusnew. If it's Chargedoff or Default, I will say it's a bad loan, and the loanstatusnew will be 1, otherwise it will be 0. Then I use glm to do the logistic regression analysis. The result shows the three variables are significant related to the loan status.
+
+```{r}
+loan.st_grouped$loanstatusnew <- factor ( with ( loan.st_grouped, ifelse ( ( LoanStatusGrouped == "Bad Loan" ), 1 , 0 ) ) )
+#glmfit<-glm(formula =loanstatusnew ~BorrowerRate+ DebtToIncomeRatio, data = loan.st_grouped,family=binomial)
+glmfit<-glm(formula =loanstatusnew ~BorrowerRate+ DebtToIncomeRatio+CurrentDelinquencies, data = loan.st_grouped,family=binomial("logit"))
+summary(glmfit)
+plot(fitted(glmfit))
+```
+
+## Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+For the Borrower Rate, Prosper Rating and Loan Status, we can see a clearly pattern in the graph. They actually strengthened each other. For the stated monthly income and open credit line, they actually didn't play a role in the relationship for the prosper rating and loan status.
 
 ### Were there any interesting or surprising interactions between features?
+I thought the stated monthly Income would have a strong relationship with the loan status, but it turns out not that significant. And the other part is that the Borrower rate seems to be the direct result of the Prosper Rating, even I add the Debt To Income Ratio, it won't play any roles there.
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
+I created two models, one is linear regression model for the borrower rate, the other one is the logistci regression model to predict the bad loans. The good thing is we can get a quantative analysis from the model result, like P value, R square, then we can say how strong the relationship is not just based on the graphs.
 
-------
+The models are not perfect, and we can see that the borrower rate actually is highly correlated with the Prosper Rating, which already separates the loans by risk, this seems like a circle. I try to clean the variables in the model, and do more data transformation, but it's not that succesfull due to the limitation of the statistics knowledge. I also did see people use the hazard model to analyze the default rates wihch will be a good start for the next stage analysis.
+
 
 # Final Plots and Summary
 
+## Plot One and Description
 ### Plot One
-```{r echo=FALSE, Plot_One}
 
+```{r echo=FALSE, Plot_One}
+loan.st_grouped$LoanOriginationDateByMonth <- as.Date(format(loan.st_grouped$LoanOriginationDate, "%Y-%m-15"))
+
+loan.monthly_amount <- subset(loan.st_grouped, !is.na(LoanOriginalAmount)) %>%
+  group_by(LoanOriginationDateByMonth) %>%
+  summarise(amount = sum(LoanOriginalAmount))
+
+ggplot(aes(x = LoanOriginationDateByMonth, y = amount), data = loan.monthly_amount) +
+ geom_bar(stat="identity", fill="lightblue", color="black") +
+  # geom_point(color="blue", size=2) +
+  # geom_line(color="blue") +
+  scale_x_date(breaks="4 month", minor_breaks = '1 month') +
+  rotate_x_txt +
+  labs(x = "Time", y = "Total Loan Original Amount", title="Loan Origination Amount vs. Time")
 ```
 
 ### Description One
+First plot shows the overall Prosper business. The Prosper was the first P2P online lending company, it provides a direct lending bridge for the borrowers and investors. The business was started back to early 2006, and it grows very quickly until 2007. It slowed down from 2007 to 2008, and followed a quiet period from Oct, 2008 to July, 2009 due to finance crisis and more restricted regulation. It shows a steady growth after 2009. The most surprising part is the loan origination amount. If we look at the loan origination amount in 2013, it's about 4 to 5 times in 2008. More and more similar companies are in market now. LendingClub and On deck are the top two companies in the online lending industry, they both went to IPO last year. 
 
-
+## Plot Two and Analysis
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
+loan.monthly_amount <- subset(loan.st_grouped, !is.na(LoanOriginalAmount)) %>%
+  group_by(LoanOriginationDateByMonth, LoanStatusGrouped) %>%
+  summarise(amount = sum(LoanOriginalAmount)) %>% 
+  ungroup()
 
+ggplot(aes(x = LoanOriginationDateByMonth, y = amount, fill=LoanStatusGrouped), data = loan.monthly_amount) +
+ geom_bar(stat="identity", color="black") +
+  # geom_point(color="blue", size=2) +
+  # geom_line(color="blue") +
+  scale_x_date(breaks="4 month", minor_breaks = '1 month') +
+  rotate_x_txt +
+  labs(x = "Time", y = "Total Loan Original Amount", title="Loan Origination Amount vs. Time and Loan Status") 
 ```
 
 ### Description Two
+In the second plot, we will look at the loan performance. The key question to the online investors is like "will the loan be default before I get my money back?" etc. And we see the percentage of bad loans are higher in pre the quite period in 2008 than afterwards. The high default rate prior the quite period because of the less regulation and unmature indursty at that time. After the finanicial crisis, both the investers and Prosper adapted new methods to control the risk
 
-
+## Plot Three and Decription
 ### Plot Three
-```{r echo=FALSE, Plot_Three}
 
+```{r echo=FALSE, Plot_Three}
+ggplot(aes(x = ProsperRating..Alpha., y =BorrowerRate, color = LoanStatusGrouped ),
+       data =  subset(loan.st_grouped, !is.na(ProsperRating..Alpha.))) +
+  theme(legend.position = "bottom") +
+  geom_point(position = position_jitter( h = 0))  + 
+  labs(title = 'Borrower Rate by Loan Status and Prosper Rating',
+       x = 'Prosper Rating', y = 'Borrower Rate') 
 ```
 
 ### Description Three
+Next we will discuss the questions we brought up in Plot Two. After 2009, Prosper built a new credit scoring variable: Prosper Rating. The investors would use Prosper Rating to reduce their loan risk. The worse the rating ,the higher borrower rate, and the high percentage of the bad loans. We can see the trend from Plot Three. Investors are more protected by using the Prosper Rating which will help Prosper to grow bigger.
 
-------
 
 # Reflection
+The project turns out to be more difficult than I expected. I struggled but also learned a lot. One of the difficulty I faced is to understand the variables. Without much background in fiance, I have to do quite some research what does each variable mean. The other difficulty is that this project seems to be quite open ended. It does not come with a question for me to answer. I need to first find different questions and then explore the answers. The process becomes quite frustrating if I create a series of plots but fail to tell any stories from the plots generated. But I guess that is the nature of exploratory data analysis. We need to keep trying different things and look at the data from different angles.
 
-Reference
-=================================
----
-references:
-- id: prosper_wikipedia
-  URL: 'https://en.wikipedia.org/wiki/Prosper_Marketplace'
----
+Two crude models were created in this study to predict borrower rate and loan status.
+However, these models obviously need further improvement. The next natural step is to
+improve the model quality. Including other variables, such as IncomeVerifiable, AmountDelinquent etc., into the model,
+might be helpful to imporve the prediction accuracy.
