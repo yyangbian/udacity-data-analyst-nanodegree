@@ -649,7 +649,8 @@ ggplot(aes(x = LoanOriginationDateByMonth, y = amount), data = loan.monthly_amou
   # geom_line(color="blue") +
   scale_x_date(breaks="4 month", minor_breaks = '1 month') +
   rotate_x_txt +
-  labs(x = "Time", y = "Total Loan Original Amount", title="Loan Origination Amount vs. Time")
+  labs(x = "Loan Origination Time", y = "Total Loan Original Amount",
+       title="Loan Origination Amount vs. Time")
 ```
 
 ### Description One
@@ -669,7 +670,8 @@ ggplot(aes(x = LoanOriginationDateByMonth, y = amount, fill=LoanStatusGrouped), 
   # geom_line(color="blue") +
   scale_x_date(breaks="4 month", minor_breaks = '1 month') +
   rotate_x_txt +
-  labs(x = "Time", y = "Total Loan Original Amount", title="Loan Origination Amount vs. Time and Loan Status") 
+  labs(x = "Loan Origination Time", y = "Total Loan Original Amount",
+       title="Loan Origination Amount vs. Time and Loan Status") 
 ```
 
 ### Description Two
