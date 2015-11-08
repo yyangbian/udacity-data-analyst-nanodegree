@@ -9,7 +9,8 @@ passengers who survived and those who died in the Titanic tragedy.
 Passengers are divided into groups based on gender, passenger class, age group,
 number of siblings/spouses abroad, number of children/parents abroad
 or port or embarkation. The data can be viewed either as absolute number or as
-normalized percentages.
+normalized percentages. The final plot can be viewed
+[here](http://bl.ocks.org/yyangbian/raw/b9ba9e4ce3399a09dcc9/).
 
 ## Design
 
