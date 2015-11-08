@@ -53,16 +53,17 @@ axis label instead of only '1', '2', and '3'.
 * [Data Visualization and D3.js (Udacity)](https://www.udacity.com/course/viewer#!/c-ud507-nd)
 * [Dimple documentation](https://github.com/PMSI-AlignAlytics/dimple/wiki)
 * [Dimple examples](http://dimplejs.org/examples_index.html)
+* [Bootstrap CSS](http://getbootstrap.com/css/)
 
 # Files and Data
 * index.html: html page contains the visualization
 * js/main.js: javascript file that creates the visualization
-* initial_version: directory that contains the html, javascript and data files
+* initial\_version: directory that contains the html, javascript and data files
 for the initial version of the visualization.
 * data/titanic.csv: original downloaded dataset from
 [here](https://www.kaggle.com/c/titanic/data)
-* data/titanic_modified.csv: modified data set to create the visualization
-* titanic_data_analysis.ipynb: ipython notebook that is used to create
-data/titanic_modified.csv
+* data/titanic\_modified.csv: modified data set to create the visualization
+* titanic\_data\_analysis.ipynb: ipython notebook that is used to create
+data/titanic\_modified.csv
 
 

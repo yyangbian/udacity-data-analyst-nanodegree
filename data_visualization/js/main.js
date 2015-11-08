@@ -10,14 +10,21 @@ d3.csv("/data/titanic_modified.csv", function (data) {
   createBarPlot();
 });
 
-function switchData() {
-  createBarPlot();
-}
+var categories = ['Gender', 'Passenger Class', 'Age Group',
+                  'Number of Siblings/Spouses Abroad',
+                  'Number of Parents/Children Abroad',
+                  'Ticket Fare',
+                  'Port of Embarkation'];
 
 function createBarPlot() {
-  var e = document.getElementById('metric');
-  var categoryVal = e.options[e.selectedIndex].value;
-  var categoryText = e.options[e.selectedIndex].text;
+  var categoryVal, categoryText;
+  radios = document.forms['inputs'].categories
+  for (var i = 0; i < radios.length; i++) {
+    if (radios[i].checked) {
+      categoryVal = radios[i].value;
+      categoryText = categories[i];
+    }
+  }
   svg.selectAll('g').remove();
   myChart = new dimple.chart(svg, titanicData);
   myChart.setBounds(margin.left, margin.top,
@@ -51,18 +58,9 @@ function createBarPlot() {
   }
   svg.selectAll('text.dimple-custom-axis-title').style('font-size', '20px');
   svg.selectAll('text.dimple-custom-axis-label').style('font-size', '16px');
-
-  svg.append("text")
-          .attr("class", "chart-title")
-          .attr("x", (width / 2))
-          .attr("y", (margin.top / 2))
-          .attr("text-anchor", "middle")
-          .style("font-size", '24px')
-          .text("Titanic Passenger Data");
 }
 
 function normalizeYAxis(element) {
-  console.log('normalize');
   normalized = element.checked;
   createBarPlot();
 }
