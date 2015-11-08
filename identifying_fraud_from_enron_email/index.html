@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css,html%20%7B%20font%2Dsize%3A%20100%25%3B%20overflow%2Dy%3A%20scroll%3B%20%2Dwebkit%2Dtext%2Dsize%2Dadjust%3A%20100%25%3B%20%2Dms%2Dtext%2Dsize%2Dadjust%3A%20100%25%3B%20%7D%0A%0Abody%7B%0Acolor%3A%23444%3B%0Afont%2Dfamily%3AGeorgia%2C%20Palatino%2C%20%27Palatino%20Linotype%27%2C%20Times%2C%20%27Times%20New%20Roman%27%2C%20serif%3B%0Afont%2Dsize%3A12px%3B%0Aline%2Dheight%3A1%2E5em%3B%0Apadding%3A1em%3B%0Amargin%3Aauto%3B%0Amax%2Dwidth%3A42em%3B%0Abackground%3A%23fefefe%3B%0A%7D%0A%0Aa%7B%20color%3A%20%230645ad%3B%20text%2Ddecoration%3Anone%3B%7D%0Aa%3Avisited%7B%20color%3A%20%230b0080%3B%20%7D%0Aa%3Ahover%7B%20color%3A%20%2306e%3B%20%7D%0Aa%3Aactive%7B%20color%3A%23faa700%3B%20%7D%0Aa%3Afocus%7B%20outline%3A%20thin%20dotted%3B%20%7D%0Aa%3Ahover%2C%20a%3Aactive%7B%20outline%3A%200%3B%20%7D%0A%0A%3A%3A%2Dmoz%2Dselection%7Bbackground%3Argba%28255%2C255%2C0%2C0%2E3%29%3Bcolor%3A%23000%7D%0A%3A%3Aselection%7Bbackground%3Argba%28255%2C255%2C0%2C0%2E3%29%3Bcolor%3A%23000%7D%0A%0Aa%3A%3A%2Dmoz%2Dselection%7Bbackground%3Argba%28255%2C255%2C0%2C0%2E3%29%3Bcolor%3A%230645ad%7D%0Aa%3A%3Aselection%7Bbackground%3Argba%28255%2C255%2C0%2C0%2E3%29%3Bcolor%3A%230645ad%7D%0A%0Ap%7B%0Amargin%3A1em%200%3B%0A%7D%0A%0Aimg%7B%0Amax%2Dwidth%3A100%25%3B%0A%7D%0A%0Ah1%2Ch2%2Ch3%2Ch4%2Ch5%2Ch6%7B%0Afont%2Dweight%3Anormal%3B%0Acolor%3A%23111%3B%0Aline%2Dheight%3A1em%3B%0A%7D%0Ah4%2Ch5%2Ch6%7B%20font%2Dweight%3A%20bold%3B%20%7D%0Ah1%7B%20font%2Dsize%3A2%2E5em%3B%20%7D%0Ah2%7B%20font%2Dsize%3A2em%3B%20%7D%0Ah3%7B%20font%2Dsize%3A1%2E5em%3B%20%7D%0Ah4%7B%20font%2Dsize%3A1%2E2em%3B%20%7D%0Ah5%7B%20font%2Dsize%3A1em%3B%20%7D%0Ah6%7B%20font%2Dsize%3A0%2E9em%3B%20%7D%0A%0Ablockquote%7B%0Acolor%3A%23666666%3B%0Amargin%3A0%3B%0Apadding%2Dleft%3A%203em%3B%0Aborder%2Dleft%3A%200%2E5em%20%23EEE%20solid%3B%0A%7D%0Ahr%20%7B%20display%3A%20block%3B%20height%3A%202px%3B%20border%3A%200%3B%20border%2Dtop%3A%201px%20solid%20%23aaa%3Bborder%2Dbottom%3A%201px%20solid%20%23eee%3B%20margin%3A%201em%200%3B%20padding%3A%200%3B%20%7D%0Apre%2C%20code%2C%20kbd%2C%20samp%20%7B%20color%3A%20%23000%3B%20font%2Dfamily%3A%20monospace%2C%20monospace%3B%20%5Ffont%2Dfamily%3A%20%27courier%20new%27%2C%20monospace%3B%20font%2Dsize%3A%200%2E98em%3B%20%7D%0Apre%20%7B%20white%2Dspace%3A%20pre%3B%20white%2Dspace%3A%20pre%2Dwrap%3B%20word%2Dwrap%3A%20break%2Dword%3B%20%7D%0A%0Ab%2C%20strong%20%7B%20font%2Dweight%3A%20bold%3B%20%7D%0A%0Adfn%20%7B%20font%2Dstyle%3A%20italic%3B%20%7D%0A%0Ains%20%7B%20background%3A%20%23ff9%3B%20color%3A%20%23000%3B%20text%2Ddecoration%3A%20none%3B%20%7D%0A%0Amark%20%7B%20background%3A%20%23ff0%3B%20color%3A%20%23000%3B%20font%2Dstyle%3A%20italic%3B%20font%2Dweight%3A%20bold%3B%20%7D%0A%0Asub%2C%20sup%20%7B%20font%2Dsize%3A%2075%25%3B%20line%2Dheight%3A%200%3B%20position%3A%20relative%3B%20vertical%2Dalign%3A%20baseline%3B%20%7D%0Asup%20%7B%20top%3A%20%2D0%2E5em%3B%20%7D%0Asub%20%7B%20bottom%3A%20%2D0%2E25em%3B%20%7D%0A%0Aul%2C%20ol%20%7B%20margin%3A%201em%200%3B%20padding%3A%200%200%200%202em%3B%20%7D%0Ali%20p%3Alast%2Dchild%20%7B%20margin%3A0%20%7D%0Add%20%7B%20margin%3A%200%200%200%202em%3B%20%7D%0A%0Aimg%20%7B%20border%3A%200%3B%20%2Dms%2Dinterpolation%2Dmode%3A%20bicubic%3B%20vertical%2Dalign%3A%20middle%3B%20%7D%0A%0Atable%20%7B%20border%2Dcollapse%3A%20collapse%3B%20border%2Dspacing%3A%200%3B%20%7D%0Atd%20%7B%20vertical%2Dalign%3A%20top%3B%20%7D%0A%0A%40media%20only%20screen%20and%20%28min%2Dwidth%3A%20480px%29%20%7B%0Abody%7Bfont%2Dsize%3A14px%3B%7D%0A%7D%0A%0A%40media%20only%20screen%20and%20%28min%2Dwidth%3A%20768px%29%20%7B%0Abody%7Bfont%2Dsize%3A16px%3B%7D%0A%7D%0A%0A%40media%20print%20%7B%0A%20%20%2A%20%7B%20background%3A%20transparent%20%21important%3B%20color%3A%20black%20%21important%3B%20filter%3Anone%20%21important%3B%20%2Dms%2Dfilter%3A%20none%20%21important%3B%20%7D%0A%20%20body%7Bfont%2Dsize%3A12pt%3B%20max%2Dwidth%3A100%25%3B%7D%0A%20%20a%2C%20a%3Avisited%20%7B%20text%2Ddecoration%3A%20underline%3B%20%7D%0A%20%20hr%20%7B%20height%3A%201px%3B%20border%3A0%3B%20border%2Dbottom%3A1px%20solid%20black%3B%20%7D%0A%20%20a%5Bhref%5D%3Aafter%20%7B%20content%3A%20%22%20%28%22%20attr%28href%29%20%22%29%22%3B%20%7D%0A%20%20abbr%5Btitle%5D%3Aafter%20%7B%20content%3A%20%22%20%28%22%20attr%28title%29%20%22%29%22%3B%20%7D%0A%20%20%2Eir%20a%3Aafter%2C%20a%5Bhref%5E%3D%22javascript%3A%22%5D%3Aafter%2C%20a%5Bhref%5E%3D%22%23%22%5D%3Aafter%20%7B%20content%3A%20%22%22%3B%20%7D%0A%20%20pre%2C%20blockquote%20%7B%20border%3A%201px%20solid%20%23999%3B%20padding%2Dright%3A%201em%3B%20page%2Dbreak%2Dinside%3A%20avoid%3B%20%7D%0A%20%20tr%2C%20img%20%7B%20page%2Dbreak%2Dinside%3A%20avoid%3B%20%7D%0A%20%20img%20%7B%20max%2Dwidth%3A%20100%25%20%21important%3B%20%7D%0A%20%20%40page%20%3Aleft%20%7B%20margin%3A%2015mm%2020mm%2015mm%2010mm%3B%20%7D%0A%20%20%40page%20%3Aright%20%7B%20margin%3A%2015mm%2010mm%2015mm%2020mm%3B%20%7D%0A%20%20p%2C%20h2%2C%20h3%20%7B%20orphans%3A%203%3B%20widows%3A%203%3B%20%7D%0A%20%20h2%2C%20h3%20%7B%20page%2Dbreak%2Dafter%3A%20avoid%3B%20%7D%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h1 id="identifying-fraud-at-enron-using-emails-and-financial-data">Identifying Fraud at Enron Using Emails and Financial Data</h1>
+<h4 id="project-4---udacity-nanodegree">Project 4 - Udacity Nanodegree</h4>
+<h4 id="yang-yang">Yang Yang</h4>
+<h2 id="project-overview">Project Overview</h2>
+<p>In 2000, Enron was one of the largest companies in the United States. By 2002, it had collapsed into bankruptcy due to widespread corporate fraud. In the resulting Federal investigation, a significant amount of typically confidential information entered into the public record, including tens of thousands of emails and detailed financial data for top executives. In this project, skills gained from class &quot;Machine Learning&quot; is used to build a person of interest identifier based on financial and email data made public as a result of the Enron scandal.</p>
+<h2 id="question-1">Question 1</h2>
+<blockquote>
+<p>Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?</p>
+</blockquote>
+<h3 id="goal-of-the-project">Goal of the project</h3>
+<p>The goal of this project is to build a prediction model to identify person -of-interest (POI) based on financial and email data made public as a result of the Enron scandal. A person is considered as a POI if he or she was indicted, reached a settlement or plea deal with the government, or testified in exchange for prosecution immunity.</p>
+<p>The dataset contains financial and email data of 146 persons, out of which 18 are real POIs. Each person's record includes 14 financial features and 6 email features.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Feature</th>
+<th align="center">Number of Data Available</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">bonus</td>
+<td align="center">82</td>
+</tr>
+<tr class="even">
+<td align="right">deferral_payments</td>
+<td align="center">39</td>
+</tr>
+<tr class="odd">
+<td align="right">deferred_income</td>
+<td align="center">49</td>
+</tr>
+<tr class="even">
+<td align="right">director_fees</td>
+<td align="center">17</td>
+</tr>
+<tr class="odd">
+<td align="right">exercised_stock_options</td>
+<td align="center">102</td>
+</tr>
+<tr class="even">
+<td align="right">expenses</td>
+<td align="center">95</td>
+</tr>
+<tr class="odd">
+<td align="right">loan_advances</td>
+<td align="center">4</td>
+</tr>
+<tr class="even">
+<td align="right">long_term_incentive</td>
+<td align="center">66</td>
+</tr>
+<tr class="odd">
+<td align="right">restricted_stock</td>
+<td align="center">110</td>
+</tr>
+<tr class="even">
+<td align="right">restricted_stock_deferred</td>
+<td align="center">18</td>
+</tr>
+<tr class="odd">
+<td align="right">salary</td>
+<td align="center">95</td>
+</tr>
+<tr class="even">
+<td align="right">total_payments</td>
+<td align="center">125</td>
+</tr>
+<tr class="odd">
+<td align="right">total_stock_value</td>
+<td align="center">126</td>
+</tr>
+<tr class="even">
+<td align="right">other</td>
+<td align="center">93</td>
+</tr>
+<tr class="odd">
+<td align="right">email_address</td>
+<td align="center">111</td>
+</tr>
+<tr class="even">
+<td align="right">from_messages</td>
+<td align="center">86</td>
+</tr>
+<tr class="odd">
+<td align="right">from_poi_to_this_person</td>
+<td align="center">86</td>
+</tr>
+<tr class="even">
+<td align="right">from_this_person_to_poi</td>
+<td align="center">86</td>
+</tr>
+<tr class="odd">
+<td align="right">shared_receipt_with_poi</td>
+<td align="center">86</td>
+</tr>
+<tr class="even">
+<td align="right">to_messages</td>
+<td align="center">86</td>
+</tr>
+</tbody>
+</table>
+<h3 id="outliers">Outliers</h3>
+<p>After exploring the dataset using python, 2 candidates were identified as outliers and removed from the data set in further analysis:</p>
+<ul>
+<li>TOTAL: this is likely a spreadsheet artifact.</li>
+<li>LOCKHART EUGENE E: No feature of this person is available.</li>
+</ul>
+<p>Based on the &quot;domain knowledge&quot;, email_address should not be helpful in the analysis. It will be removed from the analysis as well, which left us 144 data points with 19 features.</p>
+<h2 id="question-2">Question 2</h2>
+<blockquote>
+<p>What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.</p>
+</blockquote>
+<p>There are a lot of missing values in the final dataset. For loan_advances, only 4 data points are available, which is less than 5% of the data. Besides, some of the POIs have this feature, while the rest do not. So there is no good reason why this feature has so little data So this feature is removed in final analysis. email_address is not used and also removed from the dataset.</p>
+<p>Since the amount of data is small and there are a lot of features available, principle component analysis (PCA) is used for dimensionality reduction. Some of the features are highly correlated. For example, the correlation coefficient between total_stock_value and exercised_stock_options is 0.96; between total_payments and other is 0.83. PCA should be helpful to remove this collinearity between different features.</p>
+<p>The original feature data are on vastly different scales and vary significantly by several orders of magnitude. Because PCA, logistic regression and support vector machines have better performance with features on a similar scale, all features are scaled to values between 0 and 1 using <em>MinMaxScaler</em>.</p>
+<h4 id="feature-engineering">Feature Engineering</h4>
+<p>All missing values are replaced with the median of the corresponding feature.</p>
+<p>director_fees and restricted_stock_deferred also have many missing values. But the values of these two features are missing for all POIs. Maybe POIs tend not have values on these features. To account for this, two features director_fees_cat and restricted_stock_deferred_cat are added into the dataset with 0 means data not available and 1 means data exists in the dataset. These features were used in the final model; but they only improve the model quality slightly.</p>
+<h2 id="question-3">Question 3</h2>
+<blockquote>
+<p>What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?</p>
+</blockquote>
+<p>Logistic regression turns out to the method with best performance. Besides, I have also tried several other methods: Gaussian Naive Bayes, Support Vector Machine Classifier, and K-means clustering.</p>
+<h2 id="question-4">Question 4</h2>
+<blockquote>
+<p>What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well? How did you tune the parameters of your particular algorithm? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier). [relevant rubric item: “tune the algorithm”]</p>
+</blockquote>
+<p>Parameters of an algorithm affects its performance. If these parameters are not tuned properly, the default value will be used and the resulting model is probably not an optimized one, which means its precision, recall or other performance metrics will not be as good as it could be.</p>
+<p>In this work, grid search was used to tune major parameters of the corresponding algorithm. Grid search is done on 100 cross-validation splits. The average score obtained for testing over the testing data in each split is then calculated to get the model with the highest average score. Since the goal is to achieve better than 0.3 precision and recall, &quot;f1&quot; was used as the scoring function in the grid search.</p>
+<h2 id="question-5">Question 5</h2>
+<blockquote>
+<p>What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?</p>
+</blockquote>
+<p>Validation helps you understand the performance of the model outside the specific dataset. Typically, the dataset is split into training and testing dataset. The model is trained on the training data and then verified over the testing dataset. A classic mistake is overfitting. The model is able to have very accurate prediction within the training data; but its performance over the testing data is very poor.</p>
+<p>The dataset for this project is very small. Therefore no data is reversed only for testing. Instead, stratified shuffle split is used to evaluate the model performance. 1000 randomized train-test splits are created; precision, recall and f1-score are the average values from these 1000 cases.</p>
+<h2 id="question-6">Question 6</h2>
+<blockquote>
+<p>Give at least 2 evaluation metrics and your average performance for each of them. Explain an interpretation of your metrics that says something human understandable about your algorithm’s performance.</p>
+</blockquote>
+<p>Accuracy is not a good choice of evaluation metrics for this project because the number of two classes are not balanced. If the model predicts non-POIs for all the cases, the accuracy is still as high as 0.875. Precision, recall and F1 score will be used for evaluation here.</p>
+<ul>
+<li><strong>Precision</strong>: TruePositive / (TruePositive + FalsePositive). A high precision means whenever a POI gets flagged, we have a high confidence that it is very likely to be a real POI and not a false alarm.</li>
+<li><strong>Recal</strong>: TruePositive / (TruePositive + FalseNegative). A high recall means the model is very unlikely to miss a real POI.</li>
+<li><strong>F1 score</strong>: TruePositive * 2 / (TruePositive * 2 + FalseNegative + FalsePositive). This is the best of both worlds. High f1 score means that both false positive and false negative rates are low, which means that POIs can be identified reliably and accurately. If the model finds a POI then the person is almost certainly a POI; if the identifier does not flag someone, then they are almost certainly not a POI.</li>
+</ul>
+<table>
+<thead>
+<tr class="header">
+<th align="right">Algorithm</th>
+<th align="center">Precision</th>
+<th align="center">Recall</th>
+<th align="center">F1 Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">Logistic Regression</td>
+<td align="center">0.365</td>
+<td align="center">0.775</td>
+<td align="center">0.496</td>
+</tr>
+<tr class="even">
+<td align="right">Gaussian Naive Bayes</td>
+<td align="center">0.36</td>
+<td align="center">0.344</td>
+<td align="center">0.352</td>
+</tr>
+<tr class="odd">
+<td align="right">Support Vector Classifier</td>
+<td align="center">0.353</td>
+<td align="center">0.689</td>
+<td align="center">0.467</td>
+</tr>
+<tr class="even">
+<td align="right">K-means Clustering</td>
+<td align="center">0.108</td>
+<td align="center">0.233</td>
+<td align="center">0.174</td>
+</tr>
+</tbody>
+</table>
+<h1 id="files">Files</h1>
+<ul>
+<li>poi_id.py: POI identifier</li>
+<li>poi_utils.py: pipelines and parameter grids used for grid search to find the optimal model parameters</li>
+<li>tester.py: Udacity-provided file; used for validation and output relevant model information for submission</li>
+<li>README.md: markdown file to generate this report</li>
+<li>index.html: report generated from the markdown file</li>
+</ul>
+</body>
+</html>
