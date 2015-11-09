@@ -39,9 +39,12 @@ menu to see them).
 
 ### Feedback 2
 >The data also has a variable "Fare". Logically, you may think that the people
->who paid more for the ticket were richer, possibly in 1st or 2nd class and
->thus had more chance or survival. You may try to create bins for the ticket
+who paid more for the ticket were richer, possibly in 1st or 2nd class and
+thus had more chance or survival. You may try to create bins for the ticket
 fare and include it in the plot as well.
+
+>I understand this, but others may not get the terminology "normalized", so
+you might consider explaining that somehow.
 
 ### Feedback 3
 >Some things that confused me: for port of embarkation, I don't know where
