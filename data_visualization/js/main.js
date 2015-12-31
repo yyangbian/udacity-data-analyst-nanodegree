@@ -4,13 +4,13 @@ var normalized = document.getElementById("normalized").checked;
 
 // specify margin and size of the chart
 var margin = {top: 40, right: 20, bottom: 40, left: 80},
-    width = 900, height = 600;
+    width = 750, height = 400;
 
 var svg = dimple.newSvg("#chartContainer", width, height);
 
 // load the data file and initialize the bar chart
 var titanicData;
-d3.csv("/data/titanic_modified.csv", function (data) {
+d3.csv("data/titanic_modified.csv", function (data) {
   titanicData = data;
   createBarPlot();
 });
@@ -83,8 +83,8 @@ function createBarPlot() {
   if (normalized) {
     svg.select('text.dimple-axis-y').text("Percentage");
   }
-  svg.selectAll('text.dimple-custom-axis-title').style('font-size', '20px');
-  svg.selectAll('text.dimple-custom-axis-label').style('font-size', '16px');
+  svg.selectAll('text.dimple-custom-axis-title').style('font-size', '18px');
+  svg.selectAll('text.dimple-custom-axis-label').style('font-size', '14px');
 }
 
 // When "Normalized" check box changed, re-create the chart based on its value
